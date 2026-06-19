@@ -1,0 +1,6 @@
+# Copy this file to variab.py and set BASE_PATH to your desired output directory.
+# Output files will be placed under <BASE_PATH>/music/
+# Example (Windows): r"C:/Users/YourName/Music/YouTube/"
+# Example (Linux/Mac): "/home/yourname/Music/YouTube/"
+
+BASE_PATH = r"YOUR_OUTPUT_DIRECTORY_HERE"
