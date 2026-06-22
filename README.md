@@ -1,6 +1,7 @@
 # YouTube Playlist to MP3 Downloader
 
 Downloads YouTube playlists and converts them to MP3 at 192 kbps using `yt-dlp` and FFmpeg.
+Supports playlists of any size, per-song progress logging, and automatic retry of failed tracks.
 
 ---
 
@@ -8,7 +9,7 @@ Downloads YouTube playlists and converts them to MP3 at 192 kbps using `yt-dlp` 
 
 - Python 3.12+
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- Google Chrome (logged into YouTube — used for cookies to bypass age restrictions)
+- A `cookies.txt` file exported from your browser (see Setup step 5)
 
 > **FFmpeg must be installed and added to your system PATH.**
 > Without it the audio conversion step will fail and no MP3 files will be produced.
@@ -58,7 +59,18 @@ Open `converter/variab.py` and set `BASE_PATH` to the folder where you want your
 BASE_PATH = r"C:/Users/YourName/Music/YouTube/"
 ```
 
-**5. Add your playlist URLs**
+**5. Export your browser cookies**
+
+yt-dlp needs your YouTube login cookies to access age-restricted content and full playlist data.
+
+- Install the **"Get cookies.txt LOCALLY"** extension ([Chrome/Edge](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)) or the **cookies.txt** add-on for Firefox
+- Go to [youtube.com](https://youtube.com) while logged in
+- Click the extension and export as `cookies.txt`
+- Save the file to `converter/cookies.txt`
+
+> `cookies.txt` is listed in `.gitignore` and will never be committed.
+
+**6. Add your playlist URLs**
 
 Open `converter/youtube-toMp3.py` and populate the `playlist_urls` list:
 
@@ -93,5 +105,7 @@ Already-downloaded tracks are skipped automatically on subsequent runs. Delete `
 
 ## Notes
 
-- By default, cookies are read from **Chrome**. Change `"cookiesfrombrowser": ("chrome",)` to `"firefox"` or `"edge"` in `youtube-toMp3.py` if needed.
+- Each song is logged as it finishes downloading.
+- Failed songs are logged individually and listed as a summary at the end of the session. Since they are not added to `downloaded.txt`, they are retried automatically on the next run.
 - The script adds a small delay between playlists to avoid rate limiting.
+- Playlists larger than 100 songs are fully supported.

@@ -12,7 +12,7 @@ ARCHIVE_FILE = os.path.join(BASE_PATH, "downloaded.txt")
 os.makedirs(MUSIC_PATH, exist_ok=True)
 
 playlist_urls = [
-    "link to playlist"
+    "INSERT_PLAYLIST_URL_HERE"
 ]
 
 
@@ -22,6 +22,18 @@ def log_message(message):
     print(msg)
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(msg + "\n")
+
+
+failed_songs = []
+
+
+def song_hook(d):
+    if d["status"] == "finished":
+        log_message(f"Downloaded: {os.path.basename(d['filename'])}")
+    elif d["status"] == "error":
+        title = d.get("info_dict", {}).get("title") or os.path.basename(d.get("filename", "unknown"))
+        log_message(f"Failed: {title}")
+        failed_songs.append(title)
 
 
 # === YT-DLP OPTIONS (LARGE PLAYLIST SAFE) ===
@@ -34,8 +46,7 @@ ydl_opts = {
         MUSIC_PATH, "%(title)s.%(ext)s"  # %(id)s -
     ),
 
-    # avoid age restrictions
-    "cookiesfrombrowser": ("chrome",),  # or "firefox", "edge", etc.
+    "cookiefile": os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt"),
 
     # Convert to MP3
     "postprocessors": [{
@@ -56,13 +67,13 @@ ydl_opts = {
     # Resume & skip already downloaded
     "download_archive": ARCHIVE_FILE,
 
-    # Stable client
-    "player_client": "android",
+    "extractor_args": {"youtubetab": {"skip": ["webpage"]}},
 
     # Logging
     "quiet": True,
     "noprogress": True,
     "no_warnings": True,
+    "progress_hooks": [song_hook],
 
     # Network safety
     "geo_bypass": True,
@@ -95,4 +106,12 @@ if __name__ == "__main__":
         time.sleep(3)  # small cooldown between playlists
 
     log_message("=== SESSION COMPLETE ===")
-    print("\n Done. Check the log for details.")
+
+    if failed_songs:
+        log_message(f"Failed songs ({len(failed_songs)}):")
+        for song in failed_songs:
+            log_message(f"  - {song}")
+    else:
+        log_message("No failed songs.")
+
+    print("\nDone. Check the log for details.")

@@ -3,3 +3,4 @@
 __pycache__/
 *.pyc
 converter/variab.py
+converter/cookies.txt
